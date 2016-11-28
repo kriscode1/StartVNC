@@ -126,8 +126,8 @@ def findRectangleAtCoords(i, col, row, minRectWidth, minRectHeight):
 	i	= window screenshot as an Image object, assumed black and white pixels
 	col = int, column of the upper-left coordinate of the potential rectangle
 	row = int, row of the upper-left coordinate of the potential rectangle
-	minRectWidth 	= int, minimum width of a valid rectangle
-	minRectHeight 	= int, minimum height of a valid rectangle
+	minRectWidth  = int, minimum width of a valid rectangle
+	minRectHeight = int, minimum height of a valid rectangle
 	
 	Returns a Rectangle object describing the found black rectangle, or None 
 	if none was found at position (col, row). A valid rectangle is one which 
