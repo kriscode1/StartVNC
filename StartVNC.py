@@ -1,6 +1,11 @@
-'''Automatically signs into the VNC server, finds the desired window displayed through the server screen, and repositions VNC to show that window only.
+'''Automatically signs into the VNC server, finds the desired window displayed 
+through the server screen, and repositions VNC to show that window only.
 
-After signing in to VNC, screenshots are taken to find the rectangular border of the window of interest displayed through the VNC viewer. When that rectangle is found, the VNC window is resized to fit only that rectangle of interest. The scroll buttons are clicked until the rectangle is centered correctly in view. Finally, the VNC window is moved to a better location.
+After signing in to VNC, screenshots are taken to find the rectangular border 
+of the window of interest displayed through the VNC viewer. When that 
+rectangle is found, the VNC window is resized to fit only that rectangle of 
+interest. The scroll buttons are clicked until the rectangle is centered 
+correctly in view. Finally, the VNC window is moved to a better location.
 '''
 
 from PIL import Image, ImageFilter
@@ -44,7 +49,8 @@ class Rectangle:
 	
 	def __str__(self):
 		'''Hastily converts all attributes into a string.'''
-		return str((self.left, self.top, self.right, self.bottom, self.width, self.height))
+		return str((self.left, self.top, self.right, self.bottom, 
+					self.width, self.height))
 
 hwnd = win32gui.FindWindow(None, VNC_WINDOW_TITLE)
 if (hwnd != 0):
@@ -83,14 +89,16 @@ if (hwnd == 0):
 
 #Collect window dimensions
 windowRect = Rectangle(win32gui.GetWindowRect(hwnd))
-print("Left:", windowRect.left, "Top:", windowRect.top, "Right:", windowRect.right, "Bottom:", windowRect.bottom)
+print("Left:", windowRect.left, "Top:", windowRect.top, 
+	  "Right:", windowRect.right, "Bottom:", windowRect.bottom)
 
 #Reset windowRect to desired window coordinates
 windowRect.left = windowRect.top = 0
 windowRect.right = windowRect.width
 windowRect.bottom = windowRect.height
 
-win32gui.SetWindowPos(hwnd, win32con.HWND_TOP, windowRect.left, windowRect.top, windowRect.width, windowRect.height, 0)
+win32gui.SetWindowPos(hwnd, win32con.HWND_TOP, windowRect.left, 
+					  windowRect.top, windowRect.width, windowRect.height, 0)
 
 #Wait for screen to finish loading
 #VNC viewer shows gray (204, 204, 204) while loading
@@ -113,7 +121,7 @@ i = i.convert("L")
 i = i.point(grayToBW)
 
 def findRectangleAtCoords(i, col, row, minRectWidth, minRectHeight):
-	'''Searches a black and white screenshot for a black rectangle at (col, row).
+	'''Searches a black/white screenshot for a black rectangle at (col, row).
 	
 	i	= window screenshot as an Image object, assumed black and white pixels
 	col = int, column of the upper-left coordinate of the potential rectangle
@@ -121,10 +129,17 @@ def findRectangleAtCoords(i, col, row, minRectWidth, minRectHeight):
 	minRectWidth 	= int, minimum width of a valid rectangle
 	minRectHeight 	= int, minimum height of a valid rectangle
 	
-	Returns a Rectangle object describing the found black rectangle, or None if none was found at position (col, row). A valid rectangle is one which has non-broken lines of black pixels to complete the four borders, and each border is long enough to satisfy minRectWidth and minRectHeight. 
+	Returns a Rectangle object describing the found black rectangle, or None 
+	if none was found at position (col, row). A valid rectangle is one which 
+	has non-broken lines of black pixels to complete the four borders, and 
+	each border is long enough to satisfy minRectWidth and minRectHeight. 
 	'''
 	#Test if (col, row) looks like a black upper-left corner pixel
-	if not ((i.getpixel((col, row)) == 0) and (i.getpixel((col-1, row)) == 255) and (i.getpixel((col, row-1)) == 255) and (i.getpixel((col+1, row)) == 0) and (i.getpixel((col, row+1)) == 0)):
+	if not ((i.getpixel((col, row)) == 0) 
+	   and (i.getpixel((col-1, row)) == 255) 
+	   and (i.getpixel((col, row-1)) == 255) 
+	   and (i.getpixel((col+1, row)) == 0) 
+	   and (i.getpixel((col, row+1)) == 0)):
 		return None
 	upperLeft = (col, row)
 	#Find an upper-right corner, following the black pixels right
@@ -189,7 +204,8 @@ minRectHeight = 100
 (width, height) = i.size
 for row in range(1, height-1):
 	for col in range(1, width-1):
-		rectangle = findRectangleAtCoords(i, col, row, minRectWidth, minRectHeight)
+		rectangle = findRectangleAtCoords(i, col, row, 
+										  minRectWidth, minRectHeight)
 		if rectangle != None:
 			break
 	if rectangle != None:
@@ -203,13 +219,15 @@ windowRect.right = rectangle.width + 8
 windowRect.bottom = rectangle.height + 70
 windowRect.resetWidthHeight()
 
-win32gui.SetWindowPos(hwnd, win32con.HWND_TOP, windowRect.left, windowRect.top, windowRect.width, windowRect.height, 0)
+win32gui.SetWindowPos(hwnd, win32con.HWND_TOP, windowRect.left, 
+					  windowRect.top, windowRect.width, windowRect.height, 0)
 
 #Horizontal scroll to center the rectangle
 lastKnownLeftBorderCol = rectangle.left
 xClicksEstimation = int(rectangle.left/3)	#To prevent clicking forever
 loopcount = 0
-win32api.SetCursorPos((windowRect.width - 30, windowRect.height - 12))	#Right scroll button
+#Right scroll button
+win32api.SetCursorPos((windowRect.width - 30, windowRect.height - 12))
 leftBorderFound = True
 #Click to scroll right until the left border of the rectangle is off the screen
 while leftBorderFound and (loopcount < xClicksEstimation + 20):
@@ -237,7 +255,8 @@ time.sleep(0.1)
 lastKnownTopBorderRow = rectangle.top
 yClicksEstimation = int(rectangle.top/3.3)+1	#To prevent clicking forever
 loopcount = 0
-win32api.SetCursorPos((windowRect.width - 12, windowRect.height - 30))	#Down scroll button
+#Down scroll button
+win32api.SetCursorPos((windowRect.width - 12, windowRect.height - 30))
 topBorderFound = True
 #Click to scroll down until the top border of the rectangle is off the screen
 while topBorderFound and (loopcount < yClicksEstimation + 20):
@@ -263,7 +282,9 @@ time.sleep(0.1)
 clickMouse()
 time.sleep(0.1)
 
-#Consider adjusting for screen height later instead of repositioning with absolute coordinates
+#Consider adjusting for screen height later instead of repositioning with 
+#absolute coordinates
 #screenHeight = win32api.GetSystemMetrics(win32con.SM_CYFULLSCREEN)
 
-win32gui.SetWindowPos(hwnd, win32con.HWND_TOP, 1864, 276, windowRect.width, windowRect.height, 0)
+win32gui.SetWindowPos(hwnd, win32con.HWND_TOP, 1864, 276, 
+					  windowRect.width, windowRect.height, 0)
